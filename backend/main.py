@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # --- 1. Load your CLEAN, FINAL Keras model ---
 # This path should be correct
-MODEL_PATH = '../ml_model/saved_model/krishi_mitra_model_final.keras'
+MODEL_PATH = '../ml_model/saved_model/krishi_mitra_inference_model.keras'
 model = load_model(MODEL_PATH)
 
 # --- 2. Load the Class Names (Copied from your notebook) ---
@@ -49,7 +49,7 @@ def preprocess_image(image_bytes: bytes) -> tf.Tensor:
     """
     image = Image.open(io.BytesIO(image_bytes))
     image = image.resize((224, 224)) # Resize to model's expected input
-    image_array = np.array(image)
+    image_array = np.array(image)/ 255.0 # Normalize pixel values
     
     # Add a batch dimension
     image_tensor = tf.expand_dims(image_array, 0) 

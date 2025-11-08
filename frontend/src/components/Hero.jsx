@@ -4,17 +4,15 @@ import { motion } from "framer-motion"; // Make sure you ran `npm install framer
 // This component receives 'onStartSimulation' as a prop from App.jsx
 const Hero = ({ onStartSimulation }) => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col items-center justify-center text-center p-6">
+    <div className="w-full h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col items-center justify-center text-center p-6">
       <motion.header
         initial={{ opacity: 0, y: -40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
         <h1 className="text-4xl md:text-5xl font-extrabold text-green-800 mb-4">
-          🌿 Krishi Mitra
+          🌿Krishi Mitra🌿
         </h1>
-        {/* This "Red Text Test" will confirm Tailwind is working! */}
-        <h1 className="text-5xl text-red-500 font-bold">Tailwind Test</h1>
 
         <p className="text-lg md:text-xl text-green-700 font-medium max-w-2xl mx-auto leading-relaxed mt-4">
           Your Personal Crop Care Companion.

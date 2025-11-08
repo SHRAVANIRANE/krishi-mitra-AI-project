@@ -1,18 +1,22 @@
 import React, { useState } from "react";
 import Hero from "./components/Hero";
 import Simulator from "./components/Simulator";
+import Navbar from "./components/Navbar";
 
 function App() {
-  // This state controls which page is visible
-  const [page, setPage] = useState("home"); // 'home' or 'simulator'
+  const [page, setPage] = useState("home");
 
-  if (page === "home") {
-    return <Hero onStartSimulation={() => setPage("simulator")} />;
-  }
-
-  if (page === "simulator") {
-    return <Simulator onBackToHome={() => setPage("home")} />;
-  }
+  return (
+    <>
+      <Navbar /> {/* ✅ Always visible */}
+      {page === "home" && (
+        <Hero onStartSimulation={() => setPage("simulator")} />
+      )}
+      {page === "simulator" && (
+        <Simulator onBackToHome={() => setPage("home")} />
+      )}
+    </>
+  );
 }
 
 export default App;
