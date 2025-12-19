@@ -1,18 +1,23 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import tensorflow as tf
 from tensorflow.keras.models import load_model
+from scheduler import router as scheduler_router
+from dashboard import router as dashboard_router
 from PIL import Image
 import numpy as np
 import io
-from fastapi.middleware.cors import CORSMiddleware 
-from scheduler import estimate_daily_water
 
-# --- 1. Load your CLEAN, FINAL Keras model ---
-# This path should be correct
-MODEL_PATH = '../ml_model/saved_model/krishi_mitra_inference_model.keras'
+
+# ✅ IMPORT THE ROUTER
+from scheduler import router as scheduler_router
+
+from dashboard import router as dashboard_router
+
+# --- Load model ---
+MODEL_PATH = "../ml_model/saved_model/krishi_mitra_inference_model.keras"
 model = load_model(MODEL_PATH)
 
-# --- 2. Load the Class Names (Copied from your notebook) ---
 CLASS_NAMES = [
     'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
     'Blueberry___healthy', 'Cherry___healthy', 'Cherry___Powdery_mildew',
@@ -29,79 +34,42 @@ CLASS_NAMES = [
     'Tomato___Tomato_mosaic_virus', 'Tomato___Tomato_Yellow_Leaf_Curl_Virus'
 ]
 
-# --- 3. Define the FastAPI app ---
 app = FastAPI()
 
-# --- 3b. ADD YOUR CORS MIDDLEWARE (NEW) ---
-# This is the "guest list" that allows your frontend to make requests
+# ✅ REGISTER THE DASHBOARD ROUTER
+app.include_router(dashboard_router)
+
+# --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow your React app's origin
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# --- 4. Helper Function to Process the Image ---
-def preprocess_image(image_bytes: bytes) -> tf.Tensor:
-    """
-    Takes image bytes, resizes it to 224x224, and preprocesses
-    it for the model.
-    """
-    image = Image.open(io.BytesIO(image_bytes))
-    image = image.resize((224, 224)) # Resize to model's expected input
-    image_array = np.array(image)/ 255.0 # Normalize pixel values
-    
-    # Add a batch dimension
-    image_tensor = tf.expand_dims(image_array, 0) 
-    
-    return image_tensor
+# ✅ REGISTER THE SCHEDULER ROUTER (THIS WAS MISSING)
+app.include_router(scheduler_router)
 
-# --- 5. Define the Root and Prediction Endpoints ---
+def preprocess_image(image_bytes: bytes):
+    image = Image.open(io.BytesIO(image_bytes)).resize((224, 224))
+    image_array = np.array(image) / 255.0
+    return tf.expand_dims(image_array, 0)
+
 @app.get("/")
-def read_root():
-    return {"message": "Welcome to the Krishi Mitra API!"}
-
+def root():
+    return {"message": "Krishi Mitra API Running"}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    """
-    Receives an image file, preprocesses it, and returns
-    the model's prediction.
-    """
-    # 1. Read the image file
     image_bytes = await file.read()
-    
-    # 2. Preprocess the image
     image_tensor = preprocess_image(image_bytes)
-    
-    # 3. Make a prediction
+
     prediction = model.predict(image_tensor)
-    
-    # 4. Get the predicted class name
-    predicted_class_name = CLASS_NAMES[np.argmax(prediction)]
+    predicted_class = CLASS_NAMES[np.argmax(prediction)]
     confidence = float(np.max(prediction))
-    
-    # 6. Return the result
+
     return {
-        "prediction": predicted_class_name,
+        "prediction": predicted_class,
         "confidence": confidence
     }
-@app.get("/api/scheduler")
-def get_schedule():
-    area_m2=5000
-    rain_mm=2
-    eto=5
-    kc=0.9
-    efficiency=0.75
-    flow_rate_lpm=20
-
-    volume, duration = estimate_daily_water(area_m2, rain_mm, eto, kc, efficiency, flow_rate_lpm)
-    return {
-        "Field": "Wheat Plot 1",
-        "water_needed_liters": round(volume, 2),
-        "duration_minutes": round(duration, 2),
-        "message": "Irrigation schedule calculated successfully."
-
-    }
-

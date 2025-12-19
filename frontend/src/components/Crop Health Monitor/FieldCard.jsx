@@ -78,6 +78,9 @@ export default function FieldCard({ file, diagnosis }) {
 
       {isHealthy && (
         <div className="mt-3 p-3 bg-green-100 rounded">
+          <h4>Prediction: {prediction}</h4>
+          <p>Confidence: {confPct}%</p>
+
           <p>No action required. Continue monitoring.</p>
         </div>
       )}

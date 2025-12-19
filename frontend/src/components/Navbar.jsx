@@ -11,15 +11,9 @@ const Navbar = () => {
           <li className="hover:text-green-600 cursor-pointer">
             <Link to="/">Home</Link>
           </li>
-          <li className="hover:text-green-600 cursor-pointer">
-            <Link to="/weather">Weather Prediction</Link>
-          </li>
+
           <li className="hover:text-green-600 cursor-pointer">Contact</li>
         </ul>
-
-        <button className="bg-green-600 text-white px-2 py-2 rounded-lg hover:bg-green-700 transition-colors duration-300">
-          Start Simulation
-        </button>
       </nav>
     </div>
   );

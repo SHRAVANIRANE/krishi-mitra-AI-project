@@ -5,7 +5,6 @@ import DashboardLayout from "./components/DashboardLayout";
 
 // Pages
 import Dashboard from "./components/Dashboard";
-import WeatherPrediction from "./components/WeatherPrediction";
 import IrrigationCard from "./components/IrrigationCard";
 import Simulator from "./components/Simulator";
 import WeatherSearch from "./components/WeatherSearch";
